@@ -1,8 +1,17 @@
 const express = require('express');
 // import GraphQL
-const { GraphQLSchema, GraphQLObjectType, GraphQLString, graphql } = require('graphql');
+const { GraphQLSchema, GraphQLObjectType, GraphQLString, graphql, GraphQLInt } = require('graphql');
 
 const app = express();
+
+const docentesType = new GraphQLObjectType({
+    name: 'profes',
+    fields: {
+        name: { type: GraphQLString },
+        categoria: { type: GraphQLString },
+        antig: { type: GraphQLInt }
+    }
+});
 // Creating our schema
 const schema = new GraphQLSchema({
     query: new GraphQLObjectType({
@@ -14,6 +23,12 @@ const schema = new GraphQLSchema({
                 resolve() {
                     return "Hola Mundo"
                 }
+            },
+            profes: {
+                type: docentesType,
+                resolve() {
+                    return { name: 'Jesus Salvador Rodriguez', categoria: 'PA', antig: 6 };
+                }
             }
         }
     })
@@ -22,9 +37,9 @@ const schema = new GraphQLSchema({
 app.get('/', function (req, res) {
     // res.send("Hola Mundo")
     // Call function graphql for query -> graphql(schema, `{ data }`)
-    graphql(schema, `{message}`).
-    then(r => res.json(r))
-    .catch(res.json);
+    graphql(schema, `{message, profes { name, categoria,antig } }`).
+        then(r => res.json(r))
+        .catch(res.json);
 });
 
 let port = 8080;
