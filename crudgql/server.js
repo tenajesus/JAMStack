@@ -3,7 +3,7 @@ const { buildSchema } = require('graphql');
 // Importamos express-graphql
 const graphqlHTTP = require('express-graphql');
 //Importamos docentes
-const docentes = require('./docentes');
+let docentes = require('./docentes');
 
 const app = express();
 
@@ -16,14 +16,24 @@ const schema = buildSchema(`
      tipo: String!
  }
  
+ input DocentesInput{
+    nombre: String!
+    antiguedad:Int
+    tipo:String!
+ }
+ type Alerta{
+     result:String
+ }
+
  type Query{
      getDocentes: [Docentes]
      getDocente(id:ID!): Docentes
  }
 
  type Mutation {
-     addDocente(nombre: String!,antiguedad:Int,tipo:String!) : Docentes
+     addDocente(input: DocentesInput) : Docentes
      updateDocente(id:ID!,nombre:String!,antiguedad:Int,tipo:String!) : Docentes
+     deleteDocente(id:ID!): Alerta
  }
 
 
@@ -39,7 +49,8 @@ const root = {
         console.log(id);
         return pofe = docentes.find((Docentes) => id == Docentes.id)
     },
-    addDocente({ nombre, antiguedad,tipo }) {
+    addDocente({ input }) {
+        const { nombre, antiguedad,tipo } = input;
         const id = String(docentes.length + 1);
         const pofe = { id, nombre, antiguedad,tipo};
         docentes.push(pofe);
@@ -51,6 +62,12 @@ const root = {
       const newPofe = Object.assign(pofe,{nombre,antiguedad,tipo});
       pofe[Index] = newPofe;
       return newPofe;
+    },
+    deleteDocente({id}){
+      docentes = docentes.filter((docente) => docente.id != id);
+      return {
+          result: `Se ha eliminado el profesor con id ${id}` //template strings
+      }
     }
 }
 
