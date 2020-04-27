@@ -26,7 +26,7 @@ const schema = buildSchema(`
  }
 
  type Query{
-     getDocentes: [Docentes]
+     getDocentes(page: Int, limit: Int = 2): [Docentes]
      getDocente(id:ID!): Docentes
  }
 
@@ -41,7 +41,10 @@ const schema = buildSchema(`
 
 // resolver
 const root = {
-    getDocentes() {
+    getDocentes({ page, limit }) {
+        if (page !== undefined) {
+            return docentes.slice(page * limit, (page + 1) * limit);
+        }
         return docentes;
     },
     // Metodo para obtener datos individuales
@@ -50,24 +53,24 @@ const root = {
         return pofe = docentes.find((Docentes) => id == Docentes.id)
     },
     addDocente({ input }) {
-        const { nombre, antiguedad,tipo } = input;
+        const { nombre, antiguedad, tipo } = input;
         const id = String(docentes.length + 1);
-        const pofe = { id, nombre, antiguedad,tipo};
+        const pofe = { id, nombre, antiguedad, tipo };
         docentes.push(pofe);
         return pofe;
     },
-    updateDocente({id,nombre,antiguedad,tipo}){
-      const Index = docentes.findIndex((docente)=> id === docente.id);  
-      const pofe = docentes[Index];
-      const newPofe = Object.assign(pofe,{nombre,antiguedad,tipo});
-      pofe[Index] = newPofe;
-      return newPofe;
+    updateDocente({ id, nombre, antiguedad, tipo }) {
+        const Index = docentes.findIndex((docente) => id === docente.id);
+        const pofe = docentes[Index];
+        const newPofe = Object.assign(pofe, { nombre, antiguedad, tipo });
+        pofe[Index] = newPofe;
+        return newPofe;
     },
-    deleteDocente({id}){
-      docentes = docentes.filter((docente) => docente.id != id);
-      return {
-          result: `Se ha eliminado el profesor con id ${id}` //template strings
-      }
+    deleteDocente({ id }) {
+        docentes = docentes.filter((docente) => docente.id != id);
+        return {
+            result: `Se ha eliminado el profesor con id ${id}` //template strings
+        }
     }
 }
 
